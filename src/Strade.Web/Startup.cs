@@ -12,6 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Strade.Data.DbContexts;
 using Strade.Data.Entities;
+using Strade.Web.Services;
 
 namespace Strade.Web
 {
@@ -35,9 +36,11 @@ namespace Strade.Web
             options.UseSqlServer(Configuration.GetConnectionString("App"), 
             sqlServerOption => sqlServerOption.MigrationsAssembly("Strade.Data")));
 
-            services.AddIdentityCore<ApplicationUser>()
+            services.AddIdentity<ApplicationUser, IdentityRole>()
             .AddEntityFrameworkStores<AuthenticationDbContext>()
             .AddDefaultTokenProviders();
+
+            services.AddTransient<IAccountsService, AccountsService>();
 
             services.AddControllersWithViews();
         }
@@ -67,7 +70,7 @@ namespace Strade.Web
             {
                 endpoints.MapControllerRoute(
                     name: "default",
-                    pattern: "{controller=Home}/{action=Index}/{id?}");
+                    pattern: "{controller=Accounts}/{action=Index}/{id?}");
             });
 
             MigrateDbContext(svp);
@@ -87,6 +90,7 @@ namespace Strade.Web
         {
             var userEmail = "student25200020@school.com";
             var userPassword = "SuperSecretPassword@2020";
+            var matNo = "25200020";
 
             var userManager = svp.GetRequiredService<UserManager<ApplicationUser>>();
             var user = await userManager.FindByEmailAsync(userEmail);
@@ -95,11 +99,11 @@ namespace Strade.Web
                 user = new ApplicationUser
                 {
                     Email = userEmail,
-                    UserName = userEmail,
+                    UserName = matNo,
                     EmailConfirmed = true,
                     PhoneNumber = "+23412345678",
                     PhoneNumberConfirmed = true,
-                    MatricNo = "2520/0020"
+                    MatricNo = matNo
                 };
 
                 await userManager.CreateAsync(user, userPassword);
